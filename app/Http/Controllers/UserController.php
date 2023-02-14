@@ -26,8 +26,7 @@ class UserController extends Controller
     if($validator->fails()){
       return response()->json([
         'status'=> 'fail', 
-        'message' => 'Please check the required fields.',
-        'errors' => $validator->errors()
+        'message' => 'Invalid login credentials',
       ]);
     }
     $user = User::where('username', $request->username)->first();
@@ -39,8 +38,8 @@ class UserController extends Controller
     }
     if(Hash::check($request->password, $user->password)){
       $apikey = base64_encode($this->v4());
-      User::where('username', $request->username)->update(['api_key' => $apikey]);
-      $user->api_key = $apikey;
+      User::where('username', $request->username)->update(['api_token' => $apikey]);
+      $user->api_token = $apikey;
       return response()->json([
         'status' => 'success',
         'user' => $user,
@@ -73,7 +72,7 @@ class UserController extends Controller
     $user = User::create([
       'username' => $request->username,
       'name' => $request->name,
-      'api_key' => $apikey,
+      'api_token' => $apikey,
       'password' => Hash::make($request->password)
     ]);
 
@@ -89,17 +88,15 @@ class UserController extends Controller
         UserRole::create([
           'user_id' => $user->id,
           'role_id' => $role['role_id'],
-          'createdby' => Auth::user()->id,
         ]);
       }
     }
 
     if($request->facilities && is_array($request->facilities)){
       foreach($request->facilities as $facility){
-        UserRole::create([
+        UserFacility::create([
           'user_id' => $user->id,
           'facility_id' => $facility['facility_id'],
-          'createdby' => Auth::user()->id,
         ]);
       }
     }

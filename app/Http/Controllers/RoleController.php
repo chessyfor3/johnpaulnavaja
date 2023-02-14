@@ -84,7 +84,7 @@ class RoleController extends Controller
 		]);
   }
 
-  public function destroy($id)
+  public function delete($id)
   {
     $role = Role::find($id);
     $role->user_roles()->delete();
